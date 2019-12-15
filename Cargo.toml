@@ -1,0 +1,11 @@
+[package]
+name = "blaze"
+version = "0.1.0"
+authors = ["Jacob Gillespie <jacobwgillespie@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+
+[build-dependencies]
+cargo_gn = "0.0.13"
+which = "3.0.0"
