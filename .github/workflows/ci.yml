@@ -1,0 +1,73 @@
+name: CI
+
+on: push
+
+jobs:
+  build:
+    name: Build ${{ matrix.os }}
+    runs-on: "${{ matrix.os }}"
+    strategy:
+      matrix:
+        os: [macOS-latest, ubuntu-latest, windows-latest]
+    steps:
+      - name: Enable git symlinks
+        run: git config --global core.symlinks true
+
+      - name: Checkout repository
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 10
+          submodules: recursive
+
+      - name: Install stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Environment (common)
+        run: |
+          echo "$SCCACHE_KEY" > ~/sccache-key.json
+          echo ::set-env name=RUSTC_WRAPPER::sccache
+
+      - name: Environment (linux)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          cd ..
+          curl -LO https://github.com/mozilla/sccache/releases/download/0.2.12/sccache-0.2.12-x86_64-unknown-linux-musl.tar.gz
+          tar -xzvf sccache-0.2.12-x86_64-unknown-linux-musl.tar.gz
+          echo ::add-path::`pwd`/sccache-0.2.12-x86_64-unknown-linux-musl/
+
+      - name: Environment (mac)
+        if: startsWith(matrix.os, 'macOS')
+        run: |
+          cd ..
+          curl -LO https://github.com/mozilla/sccache/releases/download/0.2.12/sccache-0.2.12-x86_64-apple-darwin.tar.gz
+          tar -xzvf sccache-0.2.12-x86_64-apple-darwin.tar.gz
+          echo ::add-path::`pwd`/sccache-0.2.12-x86_64-apple-darwin/
+
+      - name: Environment (windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          cd ..
+          curl -LO https://github.com/mozilla/sccache/releases/download/0.2.12/sccache-0.2.12-x86_64-pc-windows-msvc.tar.gz
+          tar -zxvf sccache-0.2.12-x86_64-pc-windows-msvc.tar.gz
+          echo ::add-path::$(pwd)\sccache-0.2.12-x86_64-pc-windows-msvc\
+
+      - name: Start sccache server
+        env:
+          SCCACHE_GCS_BUCKET: blazerod-build-cache
+          SCCACHE_GCS_KEY_PATH: ~/sccache-key.json
+          SCCACHE_GCS_RW_MODE: READ_WRITE
+          SCCACHE_IDLE_TIMEOUT: 0
+        run: sccache --start-server
+
+      - name: Run cargo build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: -vv --release --locked --all-targets
+
+      - name: Stop sccache server
+        run: sccache --stop-server
