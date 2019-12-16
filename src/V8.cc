@@ -9,6 +9,11 @@
 
 #include "v8/include/libplatform/libplatform.h"
 
+using namespace v8;
+
+auto defaultAllocator = ArrayBuffer::Allocator::NewDefaultAllocator();
+auto defaultPlatform = platform::NewDefaultPlatform();
+
 extern "C" {
 void HelloWorld() {
   // Initialize V8.

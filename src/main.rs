@@ -1,3 +1,6 @@
+// use crate::libblaze;
+mod libblaze;
+
 extern "C" {
   fn HelloWorld();
 }
