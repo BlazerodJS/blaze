@@ -32,12 +32,12 @@ fn main() {
   let clang_base_path = download_clang();
   gn_args.push(format!("clang_base_path={:?}", clang_base_path));
 
-  if let Some(p) = env::var_os("CCACHE") {
+  if let Some(p) = env::var_os("SCCACHE") {
     cc_wrapper(&mut gn_args, &Path::new(&p));
-  } else if let Ok(p) = which("ccache") {
+  } else if let Ok(p) = which("sccache") {
     cc_wrapper(&mut gn_args, &p);
   } else {
-    println!("cargo:warning=Not using ccache");
+    println!("cargo:warning=Not using sccache");
   }
 
   let gn_root = env::var("CARGO_MANIFEST_DIR").unwrap();
@@ -127,7 +127,7 @@ fn cc_wrapper(gn_args: &mut Vec<String>, sccache_path: &Path) {
   gn_args.push(format!("cc_wrapper={:?}", sccache_path));
   // Disable treat_warnings_as_errors until this sccache bug is fixed:
   // https://github.com/mozilla/sccache/issues/264
-  // if cfg!(target_os = "windows") {
-  //   gn_args.push("treat_warnings_as_errors=false".to_string());
-  // }
+  if cfg!(target_os = "windows") {
+    gn_args.push("treat_warnings_as_errors=false".to_string());
+  }
 }
