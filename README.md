@@ -1,4 +1,4 @@
-# Blazerod ![Status: Pre-Alpha](https://badgen.net/badge/status/pre-alpha/red)
+# 🌟 Blazerod ![Status: Pre-Alpha](https://badgen.net/badge/status/pre-alpha/red)
 
 > A blazing-fast, batteries-included TypeScript runtime
 
