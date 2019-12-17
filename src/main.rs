@@ -6,6 +6,6 @@ fn main() {
   v8::init();
 
   let iso = v8::new_isolate();
-  let ret = v8::execute(iso, "test.js", "V8Engine.log('hello from JS')");
+  let ret = v8::execute(iso, "test.js", "V8Engine.log('Hello from JS ✨')");
   println!("Return code {}", ret);
 }
