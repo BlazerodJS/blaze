@@ -69,5 +69,11 @@ jobs:
           command: build
           args: -vv --release --locked --all-targets
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: "${{ matrix.os }}"
+          path: target/release/blaze
+
       - name: Stop sccache server
         run: sccache --stop-server
