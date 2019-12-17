@@ -1,16 +1,11 @@
-use libc::c_char;
-
-extern "C" {
-  fn v8_version() -> *const c_char;
-}
-
-fn version() -> &'static str {
-  use std::ffi::CStr;
-  let version = unsafe { v8_version() };
-  let c_str = unsafe { CStr::from_ptr(version) };
-  c_str.to_str().unwrap()
-}
+mod v8;
 
 fn main() {
-  println!("Using V8 {}", version())
+  println!("Using V8 {}", v8::version());
+
+  v8::init();
+
+  let iso = v8::new_isolate();
+  let ret = v8::execute(iso, "test.js", "V8Engine.log('hello from JS')");
+  println!("Return code {}", ret);
 }
