@@ -3,13 +3,13 @@
 	url = https://github.com/v8/v8.git
 [submodule "chromium_build"]
 	path = chromium_build
-	url = https://github.com/BlazerodJS/chromium_build
+	url = https://github.com/blazerod/chromium_build
 [submodule "build"]
 	path = build
-	url = https://github.com/BlazerodJS/chromium_build
+	url = https://github.com/blazerod/chromium_build
 [submodule "buildtools"]
 	path = buildtools
-	url = https://github.com/BlazerodJS/chromium_buildtools
+	url = https://github.com/blazerod/chromium_buildtools
 [submodule "third_party/zlib"]
 	path = third_party/zlib
 	url = https://chromium.googlesource.com/chromium/src/third_party/zlib.git
