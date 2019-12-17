@@ -5,6 +5,7 @@ authors = ["Jacob Gillespie <jacobwgillespie@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+libc = "0.2"
 
 [build-dependencies]
 cargo_gn = "0.0.13"

@@ -25,6 +25,7 @@ name = "blaze"
 version = "0.1.0"
 dependencies = [
  "cargo_gn 0.0.13 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.2.66 (registry+https://github.com/rust-lang/crates.io-index)",
  "which 3.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 

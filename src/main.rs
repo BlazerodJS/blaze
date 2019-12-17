@@ -1,13 +1,16 @@
-// use crate::libblaze;
-mod libblaze;
+use libc::c_char;
 
 extern "C" {
-  fn HelloWorld();
+  fn v8_version() -> *const c_char;
+}
+
+fn version() -> &'static str {
+  use std::ffi::CStr;
+  let version = unsafe { v8_version() };
+  let c_str = unsafe { CStr::from_ptr(version) };
+  c_str.to_str().unwrap()
 }
 
 fn main() {
-  println!("Hello, world!");
-  unsafe {
-    HelloWorld();
-  }
+  println!("Using V8 {}", version())
 }
