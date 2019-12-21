@@ -1,3 +1,4 @@
+mod isolate;
 mod v8;
 
 fn main() {
@@ -5,7 +6,7 @@ fn main() {
 
   v8::init();
 
-  let iso = v8::new_isolate();
-  let ret = v8::execute(iso, "test.js", "V8Engine.log('Hello from JS ✨')");
+  let mut iso = isolate::Isolate::new();
+  let ret = iso.execute("test.js", "V8Engine.log('Hello from JS ✨')");
   println!("Return code {}", ret);
 }

@@ -138,6 +138,10 @@ int v8_run(m_engine* ptr, const char* origin, const char* source) {
   return 0;
 }
 
+void v8_delete(m_engine* ptr) {
+  ptr->isolate->Dispose();
+}
+
 const char* v8_version() {
   return V8::GetVersion();
 }

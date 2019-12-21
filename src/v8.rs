@@ -5,13 +5,14 @@ use std::ffi::CString;
 pub type Opaque = [usize; 0];
 
 #[repr(C)]
-pub struct CxxIsolate(Opaque);
+pub struct isolate(Opaque);
 
 extern "C" {
   fn v8_init();
   fn v8_version() -> *const c_char;
-  fn v8_new() -> *const CxxIsolate;
-  fn v8_run(isolate: *const CxxIsolate, filename: *const c_char, source: *const c_char) -> c_int;
+  fn v8_new() -> *const isolate;
+  fn v8_run(isolate: *const isolate, filename: *const c_char, source: *const c_char) -> c_int;
+  fn v8_delete(isolate: *const isolate);
 }
 
 pub fn init() {
@@ -20,16 +21,19 @@ pub fn init() {
   };
 }
 
-pub fn new_isolate() -> *const CxxIsolate {
+pub fn new_isolate() -> *const isolate {
   unsafe { v8_new() }
 }
 
-pub fn execute(isolate: *const CxxIsolate, filename: &str, source: &str) -> i32 {
+pub fn execute(iso: *const isolate, filename: &str, source: &str) -> i32 {
   let filename = CString::new(filename).unwrap();
   let source = CString::new(source).unwrap();
 
-  let ret = unsafe { v8_run(isolate, filename.as_ptr(), source.as_ptr()) };
-  ret
+  unsafe { v8_run(iso, filename.as_ptr(), source.as_ptr()) }
+}
+
+pub fn delete(iso: *const isolate) {
+  unsafe { v8_delete(iso) }
 }
 
 pub fn version() -> &'static str {
