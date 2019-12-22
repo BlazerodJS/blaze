@@ -1,7 +1,4 @@
-#include "v8/include/v8.h"
-
-#include "v8/include/libplatform/libplatform.h"
-
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <cstdlib>
@@ -10,9 +7,16 @@
 #include <sstream>
 #include <string>
 
+#include "v8/include/libplatform/libplatform.h"
+#include "v8/include/v8.h"
+
+#include "internal.h"
+#include "v8.h"
+
 using namespace v8;
 
 auto defaultAllocator = ArrayBuffer::Allocator::NewDefaultAllocator();
+static std::unique_ptr<Platform> defaultPlatform;
 // auto defaultPlatform = platform::NewDefaultPlatform();
 
 typedef struct {
@@ -67,10 +71,7 @@ void Log(const FunctionCallbackInfo<Value>& args) {
 }
 
 extern "C" {
-static std::unique_ptr<Platform> defaultPlatform;
-
-// Initialize V8
-void v8_init() {
+void blazerod_init() {
   if (defaultPlatform.get() == nullptr) {
     defaultPlatform = platform::NewDefaultPlatform();
     V8::InitializePlatform(defaultPlatform.get());
@@ -78,71 +79,78 @@ void v8_init() {
   }
 }
 
-m_engine* v8_new() {
+Blazerod* blazerod_new() {
   Isolate::CreateParams params;
   params.array_buffer_allocator = defaultAllocator;
-  Isolate* isolate = Isolate::New(params);
 
-  Locker locker(isolate);
-  Isolate::Scope isolate_scope(isolate);
-  HandleScope handle_scope(isolate);
+  blazerod::Isolate* b = new blazerod::Isolate();
+  v8::Isolate* isolate = v8::Isolate::New(params);
+  b->SetIsolate(isolate);
 
-  isolate->SetCaptureStackTraceForUncaughtExceptions(true);
+  v8::Locker locker(isolate);
+  v8::Isolate::Scope isolate_scope(isolate);
+  {
+    v8::HandleScope handle_scope(isolate);
 
-  Local<ObjectTemplate> global = ObjectTemplate::New(isolate);
-  Local<ObjectTemplate> v8engine = ObjectTemplate::New(isolate);
+    Local<ObjectTemplate> global = ObjectTemplate::New(isolate);
+    Local<ObjectTemplate> v8engine = ObjectTemplate::New(isolate);
 
-  global->Set(isolate, "V8Engine", v8engine);
+    global->Set(isolate, "V8Engine", v8engine);
 
-  v8engine->Set(isolate, "print", FunctionTemplate::New(isolate, Print));
-  v8engine->Set(isolate, "log", FunctionTemplate::New(isolate, Log));
-  // v8engine->Set(isolate, "cb", FunctionTemplate::New(isolate, cb));
+    v8engine->Set(isolate, "print", FunctionTemplate::New(isolate, Print));
+    v8engine->Set(isolate, "log", FunctionTemplate::New(isolate, Log));
+    // v8engine->Set(isolate, "cb", FunctionTemplate::New(isolate, cb));
 
-  m_engine* engine = new m_engine;
-  engine->ptr.Reset(isolate, Context::New(isolate, NULL, global));
-  engine->isolate = isolate;
-  isolate->SetData(0, engine);
-  return engine;
+    // global :: v8::MaybeLocal<v8::ObjectTemplate>()
+    auto context =
+        v8::Context::New(isolate, nullptr, global, v8::MaybeLocal<v8::Value>());
+    b->context_.Reset(isolate, context);
+  }
+
+  return reinterpret_cast<Blazerod*>(b);
 }
 
-int v8_run(m_engine* ptr, const char* origin, const char* source) {
-  m_engine* engine = static_cast<m_engine*>(ptr);
-  Isolate* isolate = engine->isolate;
-  Locker locker(isolate);
-  Isolate::Scope isolate_scope(isolate);
-  HandleScope handle_scope(isolate);
-  TryCatch try_catch(isolate);
+void blazerod_execute(Blazerod* b_, const char* filename, const char* source) {
+  auto* b = blazerod::unwrap(b_);
+  auto* isolate = b->isolate_;
 
-  Local<Context> lContext = engine->ptr.Get(isolate);
-  Context::Scope context_scope(lContext);
+  v8::Locker locker(isolate);
+  v8::Isolate::Scope isolate_scope(isolate);
+  v8::HandleScope handle_scope(isolate);
 
-  Local<String> lSource =
-      String::NewFromUtf8(isolate, source, NewStringType::kNormal)
-          .ToLocalChecked();
-  Local<String> lOrigin =
-      String::NewFromUtf8(isolate, source, NewStringType::kNormal)
-          .ToLocalChecked();
+  auto context = b->context_.Get(isolate);
+  assert(!context.IsEmpty());
+  v8::Context::Scope context_scope(context);
 
-  ScriptOrigin script_origin(lOrigin);
-  MaybeLocal<Script> script =
-      Script::Compile(lContext, lSource, &script_origin);
+  auto filename_s = blazerod::v8_str(filename);
+  auto source_s = blazerod::v8_str(source);
+
+  v8::TryCatch try_catch(isolate);
+  v8::ScriptOrigin origin(filename_s);
+
+  auto script = v8::Script::Compile(context, source_s, &origin);
+
   if (script.IsEmpty()) {
-    return 1;
+    printf("script empty\n");
+    // TODO: handle errors
+    return;
   }
 
-  MaybeLocal<v8::Value> result = script.ToLocalChecked()->Run(lContext);
+  auto result = script.ToLocalChecked()->Run(context);
+
   if (result.IsEmpty()) {
-    return 2;
+    printf("result empty\n");
+    // TODO: handle errors
+    return;
   }
-
-  return 0;
 }
 
-void v8_delete(m_engine* ptr) {
-  ptr->isolate->Dispose();
+void blazerod_delete(Blazerod* b_) {
+  auto b = blazerod::unwrap(b_);
+  delete b;
 }
 
-const char* v8_version() {
+const char* blazerod_v8_version() {
   return V8::GetVersion();
 }
 }

@@ -3,6 +3,7 @@ import("//v8/gni/v8.gni")
 
 v8_static_library("blazerod") {
   sources = [
+    "src/isolate.cc",
     "src/engine.cc",
     # "src/V8.cc",
     # "src/array_buffer.cc",
