@@ -10,23 +10,31 @@
 #include "v8/include/libplatform/libplatform.h"
 #include "v8/include/v8.h"
 
-#include "internal.h"
 #include "v8.h"
 
-using namespace v8;
+namespace blazerod {
 
-auto defaultAllocator = ArrayBuffer::Allocator::NewDefaultAllocator();
-static std::unique_ptr<Platform> defaultPlatform;
+void Isolate::SetIsolate(v8::Isolate* isolate) {
+  isolate_ = isolate;
+  isolate_->SetCaptureStackTraceForUncaughtExceptions(
+      true, 10, v8::StackTrace::kDetailed);
+  isolate_->SetData(0, this);
+}
+
+}  // namespace blazerod
+
+auto defaultAllocator = v8::ArrayBuffer::Allocator::NewDefaultAllocator();
+static std::unique_ptr<v8::Platform> defaultPlatform;
 // auto defaultPlatform = platform::NewDefaultPlatform();
 
 typedef struct {
-  Persistent<Context> ptr;
-  Isolate* isolate;
+  v8::Persistent<v8::Context> ptr;
+  v8::Isolate* isolate;
 
-  Persistent<Function> cb;
+  v8::Persistent<v8::Function> cb;
 
-  std::map<std::string, Eternal<Module>> modules;
-  std::map<int, std::map<std::string, Eternal<Module>>> resolved;
+  std::map<std::string, v8::Eternal<v8::Module>> modules;
+  std::map<int, std::map<std::string, v8::Eternal<v8::Module>>> resolved;
 } m_engine;
 
 const char* CopyString(std::string str) {
@@ -37,24 +45,24 @@ const char* CopyString(std::string str) {
   return mem;
 }
 
-const char* CopyString(String::Utf8Value& value) {
+const char* CopyString(v8::String::Utf8Value& value) {
   if (value.length() == 0) {
     return nullptr;
   }
   return CopyString(*value);
 }
 
-void Fprint(FILE* out, const FunctionCallbackInfo<Value>& args) {
+void Fprint(FILE* out, const v8::FunctionCallbackInfo<v8::Value>& args) {
   bool first = true;
   for (int i = 0; i < args.Length(); i++) {
-    Isolate* isolate = args.GetIsolate();
-    HandleScope handle_scope(isolate);
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::HandleScope handle_scope(isolate);
     if (first) {
       first = false;
     } else {
       fprintf(out, " ");
     }
-    String::Utf8Value str(isolate, args[i]);
+    v8::String::Utf8Value str(isolate, args[i]);
     const char* cstr = CopyString(str);
     fprintf(out, "%s", cstr);
   }
@@ -62,25 +70,25 @@ void Fprint(FILE* out, const FunctionCallbackInfo<Value>& args) {
   fflush(out);
 }
 
-void Print(const FunctionCallbackInfo<Value>& args) {
+void Print(const v8::FunctionCallbackInfo<v8::Value>& args) {
   Fprint(stdout, args);
 }
 
-void Log(const FunctionCallbackInfo<Value>& args) {
+void Log(const v8::FunctionCallbackInfo<v8::Value>& args) {
   Fprint(stderr, args);
 }
 
 extern "C" {
 void blazerod_init() {
   if (defaultPlatform.get() == nullptr) {
-    defaultPlatform = platform::NewDefaultPlatform();
-    V8::InitializePlatform(defaultPlatform.get());
-    V8::Initialize();
+    defaultPlatform = v8::platform::NewDefaultPlatform();
+    v8::V8::InitializePlatform(defaultPlatform.get());
+    v8::V8::Initialize();
   }
 }
 
 Blazerod* blazerod_new() {
-  Isolate::CreateParams params;
+  v8::Isolate::CreateParams params;
   params.array_buffer_allocator = defaultAllocator;
 
   blazerod::Isolate* b = new blazerod::Isolate();
@@ -92,13 +100,13 @@ Blazerod* blazerod_new() {
   {
     v8::HandleScope handle_scope(isolate);
 
-    Local<ObjectTemplate> global = ObjectTemplate::New(isolate);
-    Local<ObjectTemplate> v8engine = ObjectTemplate::New(isolate);
+    v8::Local<v8::ObjectTemplate> global = v8::ObjectTemplate::New(isolate);
+    v8::Local<v8::ObjectTemplate> v8engine = v8::ObjectTemplate::New(isolate);
 
     global->Set(isolate, "V8Engine", v8engine);
 
-    v8engine->Set(isolate, "print", FunctionTemplate::New(isolate, Print));
-    v8engine->Set(isolate, "log", FunctionTemplate::New(isolate, Log));
+    v8engine->Set(isolate, "print", v8::FunctionTemplate::New(isolate, Print));
+    v8engine->Set(isolate, "log", v8::FunctionTemplate::New(isolate, Log));
     // v8engine->Set(isolate, "cb", FunctionTemplate::New(isolate, cb));
 
     // global :: v8::MaybeLocal<v8::ObjectTemplate>()
@@ -151,6 +159,6 @@ void blazerod_delete(Blazerod* b_) {
 }
 
 const char* blazerod_v8_version() {
-  return V8::GetVersion();
+  return v8::V8::GetVersion();
 }
 }
