@@ -4,8 +4,9 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::process::exit;
 use std::process::Command;
-use typescript;
 use which::which;
+
+// mod src::typescript;
 
 fn main() {
   // git submodule update --init --recursive
@@ -55,7 +56,7 @@ fn main() {
     println!("cargo:rustc-link-lib=dylib=dbghelp");
   }
 
-  println!("cargo:rustc-env=TS_VERSION={}", typescript::ts_version());
+  // println!("cargo:rustc-env=TS_VERSION={}", typescript::ts_version());
 
   // let c = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").unwrap());
   // let o = PathBuf::from(env::var_os("OUT_DIR").unwrap());
