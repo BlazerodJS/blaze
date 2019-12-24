@@ -20,7 +20,7 @@ impl Isolate {
       unsafe { v8::blazerod_init() };
     });
 
-    let isolate = unsafe { v8::blazerod_new() };
+    let isolate = unsafe { v8::blazerod_new(Self::handle_call) };
 
     Self { isolate }
   }
@@ -30,5 +30,9 @@ impl Isolate {
     let source = CString::new(source).unwrap();
 
     unsafe { v8::blazerod_execute(self.isolate, filename.as_ptr(), source.as_ptr()) }
+  }
+
+  extern "C" fn handle_call(call_id: v8::CallId) {
+    println!("Got a call: {}", call_id);
   }
 }

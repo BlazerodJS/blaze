@@ -78,6 +78,20 @@ void Log(const v8::FunctionCallbackInfo<v8::Value>& args) {
   Fprint(stderr, args);
 }
 
+void Call(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  v8::Isolate* isolate = args.GetIsolate();
+  blazerod::Isolate* b = blazerod::Isolate::FromIsolate(isolate);
+  v8::HandleScope handle_scope(isolate);
+
+  int32_t call_id = 0;
+  if (args[0]->IsInt32()) {
+    auto context = b->context_.Get(isolate);
+    call_id = args[0]->Int32Value(context).FromJust();
+  }
+
+  b->call_cb_(call_id);
+}
+
 extern "C" {
 void blazerod_init() {
   if (defaultPlatform.get() == nullptr) {
@@ -87,11 +101,11 @@ void blazerod_init() {
   }
 }
 
-Blazerod* blazerod_new() {
+Blazerod* blazerod_new(blazerod_call_cb call_cb) {
   v8::Isolate::CreateParams params;
   params.array_buffer_allocator = defaultAllocator;
 
-  blazerod::Isolate* b = new blazerod::Isolate();
+  blazerod::Isolate* b = new blazerod::Isolate(call_cb);
   v8::Isolate* isolate = v8::Isolate::New(params);
   b->SetIsolate(isolate);
 
@@ -107,6 +121,7 @@ Blazerod* blazerod_new() {
 
     v8engine->Set(isolate, "print", v8::FunctionTemplate::New(isolate, Print));
     v8engine->Set(isolate, "log", v8::FunctionTemplate::New(isolate, Log));
+    v8engine->Set(isolate, "call", v8::FunctionTemplate::New(isolate, Call));
     // v8engine->Set(isolate, "cb", FunctionTemplate::New(isolate, cb));
 
     // global :: v8::MaybeLocal<v8::ObjectTemplate>()

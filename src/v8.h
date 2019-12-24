@@ -6,7 +6,13 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 typedef struct blazerod_s Blazerod;
+
+typedef uint32_t blazerod_call_id;
+
+typedef void (*blazerod_call_cb)(blazerod_call_id call_id);
+
 #ifdef __cplusplus
 }
 #endif
@@ -15,7 +21,8 @@ namespace blazerod {
 
 class Isolate {
  public:
-  explicit Isolate() : isolate_(nullptr), locker_(nullptr) {}
+  explicit Isolate(blazerod_call_cb cb)
+      : isolate_(nullptr), locker_(nullptr), call_cb_(cb) {}
 
   ~Isolate() { isolate_->Dispose(); }
 
@@ -28,6 +35,8 @@ class Isolate {
   v8::Isolate* isolate_;
   v8::Locker* locker_;
   v8::Persistent<v8::Context> context_;
+
+  blazerod_call_cb call_cb_;
 };
 
 static inline v8::Local<v8::String> v8_str(const char* x) {
