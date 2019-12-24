@@ -89,7 +89,7 @@ void Call(const v8::FunctionCallbackInfo<v8::Value>& args) {
     call_id = args[0]->Int32Value(context).FromJust();
   }
 
-  b->call_cb_(call_id);
+  b->call_cb_(b->blazerod_handle_, call_id);
 }
 
 extern "C" {
@@ -132,8 +132,12 @@ Blazerod* blazerod_new(blazerod_call_cb call_cb) {
   return reinterpret_cast<Blazerod*>(b);
 }
 
-void blazerod_execute(Blazerod* b_, const char* filename, const char* source) {
+void blazerod_execute(Blazerod* b_,
+                      void* blazerod_handle,
+                      const char* filename,
+                      const char* source) {
   auto* b = blazerod::unwrap(b_);
+  blazerod::BlazerodScope blazerod_scope(b, blazerod_handle);
   auto* isolate = b->isolate_;
 
   v8::Locker locker(isolate);

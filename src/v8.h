@@ -11,7 +11,8 @@ typedef struct blazerod_s Blazerod;
 
 typedef uint32_t blazerod_call_id;
 
-typedef void (*blazerod_call_cb)(blazerod_call_id call_id);
+typedef void (*blazerod_call_cb)(void* blazerod_handle,
+                                 blazerod_call_id call_id);
 
 #ifdef __cplusplus
 }
@@ -36,7 +37,28 @@ class Isolate {
   v8::Locker* locker_;
   v8::Persistent<v8::Context> context_;
 
+  void* blazerod_handle_;  // pointer to Blazerod handle, used by Rust
   blazerod_call_cb call_cb_;
+};
+
+class BlazerodScope {
+  Isolate* isolate_;
+  void* blazerod_handle_;
+  void* prev_blazerod_handle_;
+
+ public:
+  BlazerodScope(Isolate* isolate, void* handle_ptr)
+      : isolate_(isolate), blazerod_handle_(handle_ptr) {
+    assert(isolate->blazerod_handle_ == nullptr ||
+           isolate->blazerod_handle_ == handle_ptr);
+    prev_blazerod_handle_ = isolate->blazerod_handle_;
+    isolate->blazerod_handle_ = handle_ptr;
+  }
+
+  ~BlazerodScope() {
+    assert(isolate_->blazerod_handle_ == blazerod_handle_);
+    isolate_->blazerod_handle_ = prev_blazerod_handle_;
+  }
 };
 
 static inline v8::Local<v8::String> v8_str(const char* x) {
