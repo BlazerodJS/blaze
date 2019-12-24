@@ -115,14 +115,13 @@ Blazerod* blazerod_new(blazerod_call_cb call_cb) {
     v8::HandleScope handle_scope(isolate);
 
     v8::Local<v8::ObjectTemplate> global = v8::ObjectTemplate::New(isolate);
-    v8::Local<v8::ObjectTemplate> v8engine = v8::ObjectTemplate::New(isolate);
+    v8::Local<v8::ObjectTemplate> blazerod = v8::ObjectTemplate::New(isolate);
 
-    global->Set(isolate, "V8Engine", v8engine);
+    global->Set(isolate, "Blazerod", blazerod);
 
-    v8engine->Set(isolate, "print", v8::FunctionTemplate::New(isolate, Print));
-    v8engine->Set(isolate, "log", v8::FunctionTemplate::New(isolate, Log));
-    v8engine->Set(isolate, "call", v8::FunctionTemplate::New(isolate, Call));
-    // v8engine->Set(isolate, "cb", FunctionTemplate::New(isolate, cb));
+    blazerod->Set(isolate, "print", v8::FunctionTemplate::New(isolate, Print));
+    blazerod->Set(isolate, "log", v8::FunctionTemplate::New(isolate, Log));
+    blazerod->Set(isolate, "call", v8::FunctionTemplate::New(isolate, Call));
 
     // global :: v8::MaybeLocal<v8::ObjectTemplate>()
     auto context =
