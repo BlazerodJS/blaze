@@ -1,6 +1,6 @@
 use libc::{c_char, c_void};
-use std::ptr::null;
 use std::ops::Deref;
+use std::ptr::null;
 
 pub type Opaque = [usize; 0];
 
@@ -32,6 +32,16 @@ impl blazerod_buf {
   }
 }
 
+impl<'a> From<&'a [u8]> for blazerod_buf {
+  #[inline]
+  fn from(x: &'a [u8]) -> Self {
+    Self {
+      data_ptr: x.as_ref().as_ptr(),
+      data_len: x.len(),
+    }
+  }
+}
+
 impl Deref for blazerod_buf {
   type Target = [u8];
   #[inline]
@@ -56,6 +66,7 @@ extern "C" {
   pub fn blazerod_init();
   pub fn blazerod_new(cb: blazerod_call_cb) -> *const isolate;
   pub fn blazerod_execute(iso: *const isolate, handle: *const c_void, filename: *const c_char, source: *const c_char);
+  pub fn blazerod_respond(iso: *const isolate, handle: *const c_void, method_id: MethodID, buf: blazerod_buf);
   pub fn blazerod_delete(iso: *const isolate);
   pub fn blazerod_v8_version() -> *const c_char;
 }

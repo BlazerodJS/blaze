@@ -1,2 +1,2 @@
 Blazerod.log('Hello from JS ✨')
-Blazerod.call(1)
+Blazerod.call(0)

@@ -171,6 +171,13 @@ void blazerod_execute(Blazerod* b_,
   }
 }
 
+void blazerod_respond(Blazerod* b_,
+                      void* blazerod_handle,
+                      blazerod_call_id method_id,
+                      blazerod_buf buf) {
+  printf("blazerod_respond called\n");
+}
+
 void blazerod_delete(Blazerod* b_) {
   auto b = blazerod::unwrap(b_);
   delete b;

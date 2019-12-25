@@ -2,6 +2,7 @@ use std::env;
 use std::fs;
 
 mod isolate;
+mod methods;
 mod v8;
 
 fn main() {

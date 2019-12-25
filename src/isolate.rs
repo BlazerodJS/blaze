@@ -1,4 +1,5 @@
 use crate::methods::MethodRegistry;
+use crate::methods::Method;
 use crate::v8;
 use libc::c_void;
 use std::ffi::CString;
@@ -43,10 +44,18 @@ impl Isolate {
     let maybe_method = b.method_registry.call(method_id, data.as_ref());
 
     println!("Got a call: {}", method_id);
-    match maybe_method {
-      Some(op) => println!("Has a method!"),
-      None => println!("No method found"),
+    let method = match maybe_method {
+      Some(method) => method,
+      None => {
+        return println!("No method found");
+      },
     };
+
+    match method {
+      Method::Sync(buf) => {
+        b.respond(Some((method_id, &buf))); //.expect("unexpected error");
+      }
+    }
   }
 
   #[inline]
@@ -58,5 +67,16 @@ impl Isolate {
   unsafe fn from_raw_ptr<'a>(ptr: *const c_void) -> &'a mut Self {
     let ptr = ptr as *mut _;
     &mut *ptr
+  }
+
+  fn respond(&mut self, maybe_buf: Option<(v8::MethodID, &[u8])>) {
+    let (method_id, buf) = match maybe_buf {
+      None => (0, v8::blazerod_buf::empty()),
+      Some((method_id, r)) => (method_id, v8::blazerod_buf::from(r)),
+    };
+
+    unsafe {
+      v8::blazerod_respond(self.isolate, self.as_raw_ptr(), method_id, buf)
+    };
   }
 }

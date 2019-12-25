@@ -9,6 +9,11 @@ extern "C" {
 
 typedef struct blazerod_s Blazerod;
 
+typedef struct {
+  uint8_t* data_ptr;
+  size_t data_len;
+} blazerod_buf;
+
 typedef uint32_t blazerod_call_id;
 
 typedef void (*blazerod_call_cb)(void* blazerod_handle,
