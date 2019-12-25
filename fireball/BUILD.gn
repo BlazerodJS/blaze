@@ -3,7 +3,7 @@ import("//v8/gni/v8.gni")
 
 v8_static_library("blazerod") {
   sources = [
-    "src/v8.cc",
+    "v8.cc",
   ]
   deps = [
     ":v8",

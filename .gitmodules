@@ -1,30 +1,30 @@
 [submodule "v8"]
-	path = v8
+	path = fireball/v8
 	url = https://github.com/v8/v8.git
 [submodule "chromium_build"]
-	path = chromium_build
+	path = fireball/chromium_build
 	url = https://github.com/blazerod/chromium_build
 [submodule "build"]
-	path = build
+	path = fireball/build
 	url = https://github.com/blazerod/chromium_build
 [submodule "buildtools"]
-	path = buildtools
+	path = fireball/buildtools
 	url = https://github.com/blazerod/chromium_buildtools
 [submodule "third_party/zlib"]
-	path = third_party/zlib
+	path = fireball/third_party/zlib
 	url = https://chromium.googlesource.com/chromium/src/third_party/zlib.git
 [submodule "tools/clang"]
-	path = tools/clang
+	path = fireball/tools/clang
 	url = https://chromium.googlesource.com/chromium/src/tools/clang.git
 [submodule "third_party/jinja2"]
-	path = third_party/jinja2
+	path = fireball/third_party/jinja2
 	url = https://chromium.googlesource.com/chromium/src/third_party/jinja2.git
 [submodule "base/trace_event/common"]
-	path = base/trace_event/common
+	path = fireball/base/trace_event/common
 	url = https://chromium.googlesource.com/chromium/src/base/trace_event/common.git
 [submodule "third_party/markupsafe"]
-	path = third_party/markupsafe
+	path = fireball/third_party/markupsafe
 	url = https://chromium.googlesource.com/chromium/src/third_party/markupsafe.git
 [submodule "typescript/typescript"]
-	path = third_party/typescript
+	path = fireball/third_party/typescript
 	url = https://github.com/microsoft/TypeScript
