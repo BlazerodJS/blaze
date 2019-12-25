@@ -24,7 +24,17 @@ dependencies = [
 name = "blaze"
 version = "0.1.0"
 dependencies = [
+ "blazerod_compiler 0.1.0",
  "fireball 0.1.0",
+]
+
+[[package]]
+name = "blazerod_compiler"
+version = "0.1.0"
+dependencies = [
+ "fireball 0.1.0",
+ "serde 1.0.104 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_json 1.0.44 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

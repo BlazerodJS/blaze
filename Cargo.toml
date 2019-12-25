@@ -1,5 +1,6 @@
 [workspace]
 members = [
+  "compiler",
   "fireball"
 ]
 
@@ -10,4 +11,5 @@ authors = ["Jacob Gillespie <jacobwgillespie@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+blazerod_compiler = { path = "./compiler", version = "0.1.0" }
 fireball = { path = "./fireball", version = "0.1.0" }

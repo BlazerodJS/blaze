@@ -11,6 +11,7 @@ fn main() {
   }
 
   println!("Using V8 {}", fireball::v8::version());
+  println!("Using TypeScript {}", blazerod_compiler::ts_version());
   let mut iso = fireball::isolate::Isolate::new();
 
   let filename = &args[1];
